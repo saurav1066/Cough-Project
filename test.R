@@ -5,7 +5,7 @@ library(plotly)
 
 
 #reading the given excel file
-cough_data <- read_excel("cough-project/1465-0008-coughdata.xlsx")
+cough_data <- read_excel("1465-0008-coughdata.xlsx")
 
 #converting excel file to data frame
 cough_data <- data.frame(cough_data)
