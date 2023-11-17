@@ -87,6 +87,13 @@ ui <- fluidPage(
                h3("Table for the cough counts per hour"),
                gt_output("gt_table")
              )
+    ),
+    
+    tabPanel("Help",
+             mainPanel(
+               h3("Introduction to the application"),
+               textOutput('help')
+             )
     )
   )
   
