@@ -12,7 +12,7 @@ library(readxl)
 library(shiny)
 library(gt)
 library(dplyr)
-
+library(plotly)
 
 #reading the given excel file
 cough_data <- read_excel("../1465-0008-coughdata.xlsx")
@@ -70,7 +70,7 @@ ui <- fluidPage(
                  #             choices = visit_id),
                  
                  #generating plot as output
-                 plotOutput(outputId = "cough_plot")
+                 plotlyOutput(outputId = "cough_plot")
                  
                  
                  
@@ -102,7 +102,7 @@ server <- function(input, output, session) {
         cough_data[cough_data$USUBJID == input$SubjectID,]
       })
       
-      output$cough_plot <- renderPlot({
+      output$cough_plot <- renderPlotly({
         new_df <- selected_data()
         
         # Converting the 'fadtc' column to POSIXct format
@@ -157,13 +157,13 @@ server <- function(input, output, session) {
         })
         
         #plotting all the visits in same graph
-        ggplot(cough_counts, 
+        ggplotly(ggplot(cough_counts, 
                aes(x = Var1, y = Freq, group = Visit, color = Visit)) +
           geom_line() +
           geom_point()+
           labs(x = "Hours", y = "Frequency of Cough") +
           theme_minimal()
-        
+        )
         
       })
       
@@ -197,7 +197,7 @@ server <- function(input, output, session) {
       
       
       # Creating the plot
-      output$cough_plot <- renderPlot({
+      output$cough_plot <- renderPlotly({
         new_df <- selected_data()
         
         if (nrow(new_df) > 0) {
@@ -269,7 +269,7 @@ server <- function(input, output, session) {
           
           
           # Plot with sleep indicators
-          ggplot(hourly_counts, 
+          ggplotly(ggplot(hourly_counts, 
                  aes(x = factor(Var1, levels = unique(Var1)),
                      y = Freq, color = sleep, group=1)) +
             geom_line() +
@@ -277,12 +277,14 @@ server <- function(input, output, session) {
             scale_color_manual(values = c("TRUE" = "red", "FALSE" = "blue")) +
             labs(x = "Hours", y = "Frequency of Cough") +
             theme_minimal()
+          )
         } 
         
         else {
-          ggplot() +
+          ggplotly(ggplot() +
             labs(x = "Hour", y = "Count", title = "No data found for the given Visit ID and USUBJID")
-        }
+          )
+          }
       })
       
     }
