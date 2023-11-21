@@ -13,6 +13,7 @@ library(shiny)
 library(gt)
 library(dplyr)
 library(plotly)
+library(gridExtra)
 
 #reading the given excel file
 cough_data <- read_excel("../1465-0008-coughdata.xlsx")
@@ -122,6 +123,7 @@ server <- function(input, output, session) {
         grouped_df <- split(new_df,new_df$VISIT)
         
         cough_counts <- data.frame()
+        plot_list <- list()
         
         #getting hourly counts of each group of visits
         for (i in 1:length(grouped_df)) {
@@ -140,6 +142,18 @@ server <- function(input, output, session) {
                                 all.y = TRUE)
           
           hourly_count$Freq[is.na(hourly_count$Freq)] <- 0
+          
+          plot <- ggplotly(ggplot(hourly_count, 
+                          aes(x = factor(Var1, levels = unique(Var1)),
+                              y = Freq,  group=1)) +
+                     geom_line() +
+                     geom_point() +
+                     scale_color_manual(values = c("TRUE" = "red", "FALSE" = "blue")) +
+                     labs(x = "Hours", y = "Frequency of Cough") +
+                     theme_minimal()
+          )
+          
+          plot_list[[i]]<- plot
           
           hourly_count$Visit <- grouped_df[[i]]$VISIT[1]
           
@@ -162,15 +176,19 @@ server <- function(input, output, session) {
             cols_label(Var1 = "Time(hour)",
                        Freq = "Number of Cough")
         })
+        # 
+        # #plotting all the visits in same graph
+        # ggplotly(ggplot(cough_counts, 
+        #        aes(x = Var1, y = Freq, group = Visit, color = Visit)) +
+        #   geom_line() +
+        #   geom_point()+
+        #   labs(x = "Hours", y = "Frequency of Cough") +
+        #   theme_minimal()
+        # )
         
-        #plotting all the visits in same graph
-        ggplotly(ggplot(cough_counts, 
-               aes(x = Var1, y = Freq, group = Visit, color = Visit)) +
-          geom_line() +
-          geom_point()+
-          labs(x = "Hours", y = "Frequency of Cough") +
-          theme_minimal()
-        )
+        #Plotting individual graphs
+        
+        gridExtra :: grid.arrange(grobs = plot_list, ncol = 1)
         
       })
       
