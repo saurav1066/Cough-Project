@@ -71,7 +71,7 @@ ui <- fluidPage(
                  #             choices = visit_id),
                  
                  #generating plot as output
-                 plotlyOutput(outputId = "cough_plot")
+                 plotOutput(outputId = "cough_plot")
                  
                  
                  
@@ -110,7 +110,7 @@ server <- function(input, output, session) {
         cough_data[cough_data$USUBJID == input$SubjectID,]
       })
       
-      output$cough_plot <- renderPlotly({
+      output$cough_plot <- renderPlot({
         new_df <- selected_data()
         
         # Converting the 'fadtc' column to POSIXct format
@@ -128,6 +128,15 @@ server <- function(input, output, session) {
         #getting hourly counts of each group of visits
         for (i in 1:length(grouped_df)) {
           
+          #Getting sleep, wake and start time of recording values
+          sleep_time <- as.integer(grouped_df[[i]]$hour[grouped_df[[i]]$FAOBJ == "Sleep"])
+          wake_time <- as.integer(grouped_df[[i]]$hour[grouped_df[[i]]$FAOBJ == "Wake"])
+          
+          
+          start_time<- 0 # needs initialization because some subjects do not have a record
+          
+          start_time <-  as.integer(grouped_df[[i]]$hour[grouped_df[[i]]$FAOBJ == "Actual Recording Start Time"])
+          
           # Counting  the occurrences of "cough" for each hour of the day
           hourly_count <- table(grouped_df[[i]]$hour[grouped_df[[i]]$FAOBJ =="Cough"])
           hourly_count<- data.frame(hourly_count)
@@ -143,15 +152,32 @@ server <- function(input, output, session) {
           
           hourly_count$Freq[is.na(hourly_count$Freq)] <- 0
           
-          plot <- ggplotly(ggplot(hourly_count, 
+          #Creating a Sleep pointer as a column in dataframe
+          hourly_count$sleep <- ifelse((sleep_time > wake_time & 
+                                           (hourly_count$Var1 >= sleep_time | 
+                                              hourly_count$Var1 <= wake_time)) 
+                                        | 
+                                          (sleep_time <= wake_time 
+                                           & (hourly_count$Var1 >= sleep_time 
+                                              & hourly_count$Var1 <= wake_time))
+                                        , TRUE, FALSE)
+          
+          #Simple rearranging according to the start of recording time
+          hourly_count <- hourly_count[order((hourly_count$Var1 - start_time) 
+                                               %% nrow(hourly_count)),]
+          
+          row.names(hourly_count) <- 1:nrow(hourly_count)
+          
+          
+          plot <- ggplot(hourly_count, 
                           aes(x = factor(Var1, levels = unique(Var1)),
-                              y = Freq,  group=1)) +
+                              y = Freq, color = sleep, group=1)) +
                      geom_line() +
                      geom_point() +
                      scale_color_manual(values = c("TRUE" = "red", "FALSE" = "blue")) +
                      labs(x = "Hours", y = "Frequency of Cough") +
                      theme_minimal()
-          )
+          
           
           plot_list[[i]]<- plot
           
@@ -222,7 +248,7 @@ server <- function(input, output, session) {
       
       
       # Creating the plot
-      output$cough_plot <- renderPlotly({
+      output$cough_plot <- renderPlot({
         new_df <- selected_data()
         
         if (nrow(new_df) > 0) {
@@ -294,7 +320,7 @@ server <- function(input, output, session) {
           
           
           # Plot with sleep indicators
-          ggplotly(ggplot(hourly_counts, 
+          ggplot(hourly_counts, 
                  aes(x = factor(Var1, levels = unique(Var1)),
                      y = Freq, color = sleep, group=1)) +
             geom_line() +
@@ -302,13 +328,13 @@ server <- function(input, output, session) {
             scale_color_manual(values = c("TRUE" = "red", "FALSE" = "blue")) +
             labs(x = "Hours", y = "Frequency of Cough") +
             theme_minimal()
-          )
+          
         } 
         
         else {
-          ggplotly(ggplot() +
+         ggplot() +
             labs(x = "Hour", y = "Count", title = "No data found for the given Visit ID and USUBJID")
-          )
+          
           }
       })
       
