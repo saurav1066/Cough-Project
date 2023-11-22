@@ -176,6 +176,7 @@ server <- function(input, output, session) {
                      geom_point() +
                      scale_color_manual(values = c("TRUE" = "red", "FALSE" = "blue")) +
                      labs(x = "Hours", y = "Frequency of Cough") +
+                     ggtitle(paste("Cough Plot for", unique(grouped_df[[i]]$VISIT))) +
                      theme_minimal()
           
           
