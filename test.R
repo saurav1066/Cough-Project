@@ -141,4 +141,12 @@ hoverable <- ggplotly(p)
 hoverable
 
 
+#fig <- ploy_ly(hourly_counts, x= ~Vsr1, y=~Freq, type = "Scatter", mode = "lines+markers", color = ~sleep, colors = c("blue","red")) %>%
+#   layout(title = "Frequency of Cough by hours",
+#    xaxis = list(title = "Hours"),
+#    yaxis = list(title = "Frequency"))
+
+#fig
+
+
 
