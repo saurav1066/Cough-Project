@@ -1,6 +1,7 @@
 # Test
 library(readxl)
 library(plotly)
+library(lubridate)
 
 
 
@@ -47,6 +48,19 @@ wake_time
 #Getting the time when the recording was started
 start_time <-  as.integer(new_df$hour[new_df$FAOBJ == "Actual Recording Start Time"])
 start_time
+
+#Getting time of Coughs
+
+time_cough <- new_df$time[new_df$FAOBJ == "Cough"]
+time_cough 
+
+time_cough <-  as.POSIXct(time_cough, format = "%H:%M:%S")
+time_cough
+
+time_data <- format(time_cough,"%H:%M:%S")
+
+time_data <- as.numeric(hms(time_data), "hours")
+time_data
 
 #grouping the dataframe based on visits
 grouped_df <- split(new_df,new_df$VISIT)
