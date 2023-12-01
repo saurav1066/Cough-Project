@@ -72,7 +72,7 @@ ui <- fluidPage(
                  
                  #generating plot as output
                  plotOutput(outputId = "cough_plot")
-                 
+                 plotlyOutput(outputId = "coughly_plot")
                  
                  
                  # #generating a table output
@@ -136,6 +136,31 @@ server <- function(input, output, session) {
           start_time<- 0 # needs initialization because some subjects do not have a record
           
           start_time <-  as.integer(grouped_df[[i]]$hour[grouped_df[[i]]$FAOBJ == "Actual Recording Start Time"])
+          
+          #Getting time of cough 
+          time_cough <- new_df$FADTC[new_df$FAOBJ == "Cough"]
+
+          #Extract hours,minutes seconds
+          hours <- as.numeric(format(time_cough,"%H")) 
+          minutess <- as.numeric(format(time_cough,"%M"))
+          Seconds <- as.numeric(format(time_cough,"%S")) 
+
+          #Create a dataframe
+          df <- data.frame(hours,minutes,seconds)
+
+          #Plotting the time
+          output$coughly_plot <- renderPlotly(
+            ggplotly(
+              ggplot(
+                df, aes(x= hours, y = minutes, color = seconds)
+              )+
+              geom_point()+
+              scale_color_gradient(low = "blue", high = "red") +
+              labs(x = "Hours", y = "Minutes", color = "Seconds")+
+              theme_minimal
+            )
+          )
+          
           
           # Counting  the occurrences of "cough" for each hour of the day
           hourly_count <- table(grouped_df[[i]]$hour[grouped_df[[i]]$FAOBJ =="Cough"])
