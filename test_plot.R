@@ -45,7 +45,7 @@ data$time <- as.POSIXct(strptime(data$time, format = "%HH %MM %SS"), origin = "1
 # Calculate time differences and group
 data <- data %>%
   mutate(diff = c(0, as.numeric(difftime(time[-1], time[-length(time)], units = "secs")))) %>%
-  mutate(group = ifelse(diff <= 5 & diff > 0, TRUE, FALSE)) %>%
+  mutate(group = ifelse(diff <= 6 & diff > 1, TRUE, FALSE)) %>%
   mutate(group = ifelse(lead(group, default = group[n()]), TRUE, group))
 
 
