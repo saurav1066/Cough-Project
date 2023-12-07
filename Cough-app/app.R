@@ -14,12 +14,22 @@ library(gt)
 library(dplyr)
 library(plotly)
 library(gridExtra)
+library(haven)
 
 #reading the given excel file
 cough_data <- read_excel("../1465-0008-coughdata.xlsx")
 
+#reading the given excel file ans sas file
+cough_data <- read_excel("../1465-0008-coughdata.xlsx")
+extension_data <- read_sas("../sasData.sas")
+
 #converting excel file to data frame
 cough_data <- data.frame(cough_data)
+extension_data <- data.frame(extension_data)
+
+#Selecting only required columns
+extension_data <- extension_data[c("SUBJID","AGE","SEX","HRCT","SMOKSTAT")]
+
 
 #checking unique subject ids
 subject_id <- unique(cough_data$USUBJID)
