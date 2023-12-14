@@ -12,24 +12,23 @@ library(readxl)
 library(shiny)
 library(gt)
 library(dplyr)
-library(plotly)
 library(gridExtra)
+library(plotly)
 library(haven)
 
-#reading the given excel file
-cough_data <- read_excel("../1465-0008-coughdata.xlsx")
 
-#reading the given excel file ans sas file
+#reading the given excel file adn the sas file
 cough_data <- read_excel("../1465-0008-coughdata.xlsx")
-extension_data <- read_sas("../sasData.sas")
+extension_data <- read_sas("../adsl.sas7bdat")
+
+
 
 #converting excel file to data frame
 cough_data <- data.frame(cough_data)
 extension_data <- data.frame(extension_data)
 
-#Selecting only required columns
-extension_data <- extension_data[c("SUBJID","AGE","SEX","HRCT","SMOKSTAT")]
-
+#Subsetting for the columns in consideration
+extension_data <- extension_data[c('SUBJID','AGE', 'SEX', 'HRCT', 'SMOKSTAT')]
 
 #checking unique subject ids
 subject_id <- unique(cough_data$USUBJID)
@@ -73,6 +72,8 @@ ui <- fluidPage(
                  )
                ),
                
+               
+               
                mainPanel(
                  h3("Generated Plot"),
                  
@@ -81,8 +82,8 @@ ui <- fluidPage(
                  #             choices = visit_id),
                  
                  #generating plot as output
-                 plotOutput(outputId = "cough_plot")
-                 plotlyOutput(outputId = "coughly_plot")
+                 plotOutput(outputId = "cough_plot"),
+                 
                  
                  
                  # #generating a table output
@@ -93,6 +94,14 @@ ui <- fluidPage(
              )
              
     ),
+    
+    tabPanel("Plots",
+             mainPanel(
+               h3("Other Plots"),
+               plotlyOutput(outputId = "cough_plotly")
+             )
+    ),
+    
     tabPanel("Tables",
              mainPanel(
                h3("Table for the cough counts per hour"),
@@ -100,10 +109,10 @@ ui <- fluidPage(
              )
     ),
     
-    tabPanel("Help",
+    tabPanel("About",
              mainPanel(
-               h3("Introduction to the application"),
-               textOutput('help')
+               h3("About the Application"),
+               textOutput('about')
              )
     )
   )
@@ -138,41 +147,16 @@ server <- function(input, output, session) {
         #getting hourly counts of each group of visits
         for (i in 1:length(grouped_df)) {
           
-          #Getting sleep, wake and start time of recording values
+          #Getting the hour where the subject slept
           sleep_time <- as.integer(grouped_df[[i]]$hour[grouped_df[[i]]$FAOBJ == "Sleep"])
+          
+          #Getting the hour where the subject woke up
           wake_time <- as.integer(grouped_df[[i]]$hour[grouped_df[[i]]$FAOBJ == "Wake"])
           
+          #Getting the hour where the recording started
+          start_time <- as.integer(grouped_df[[i]]$hour[grouped_df[[i]]$FAOBJ == "Actual Recording Start Time"])
+          # Counting  the occurrences of "cough" for each hour of the day          
           
-          start_time<- 0 # needs initialization because some subjects do not have a record
-          
-          start_time <-  as.integer(grouped_df[[i]]$hour[grouped_df[[i]]$FAOBJ == "Actual Recording Start Time"])
-          
-          #Getting time of cough 
-          time_cough <- new_df$FADTC[new_df$FAOBJ == "Cough"]
-
-          #Extract hours,minutes seconds
-          hours <- as.numeric(format(time_cough,"%H")) 
-          minutess <- as.numeric(format(time_cough,"%M"))
-          Seconds <- as.numeric(format(time_cough,"%S")) 
-
-          #Create a dataframe
-          df <- data.frame(hours,minutes,seconds)
-
-          #Plotting the time
-          output$coughly_plot <- renderPlotly(
-            ggplotly(
-              ggplot(
-                df, aes(x= hours, y = minutes, color = seconds)
-              )+
-              geom_point()+
-              scale_color_gradient(low = "blue", high = "red") +
-              labs(x = "Hours", y = "Minutes", color = "Seconds")+
-              theme_minimal
-            )
-          )
-          
-          
-          # Counting  the occurrences of "cough" for each hour of the day
           hourly_count <- table(grouped_df[[i]]$hour[grouped_df[[i]]$FAOBJ =="Cough"])
           hourly_count<- data.frame(hourly_count)
           
@@ -189,33 +173,33 @@ server <- function(input, output, session) {
           
           #Creating a Sleep pointer as a column in dataframe
           hourly_count$sleep <- ifelse((sleep_time > wake_time & 
-                                           (hourly_count$Var1 >= sleep_time | 
-                                              hourly_count$Var1 <= wake_time)) 
-                                        | 
-                                          (sleep_time <= wake_time 
-                                           & (hourly_count$Var1 >= sleep_time 
-                                              & hourly_count$Var1 <= wake_time))
-                                        , TRUE, FALSE)
+                                          (hourly_count$Var1 >= sleep_time | 
+                                             hourly_count$Var1 <= wake_time)) 
+                                       | 
+                                         (sleep_time <= wake_time 
+                                          & (hourly_count$Var1 >= sleep_time 
+                                             & hourly_count$Var1 <= wake_time))
+                                       , TRUE, FALSE)
           
-          #Simple rearranging according to the start of recording time
+          
+          #Simple rearranging according to the start of recording time;
           hourly_count <- hourly_count[order((hourly_count$Var1 - start_time) 
-                                               %% nrow(hourly_count)),]
+                                             %% nrow(hourly_count)),]
           
           row.names(hourly_count) <- 1:nrow(hourly_count)
           
-          
+          #Creating plot for each visit
           plot <- ggplot(hourly_count, 
-                          aes(x = factor(Var1, levels = unique(Var1)),
-                              y = Freq, color = sleep, group=1)) +
-                     geom_line() +
-                     geom_point() +
-                     scale_color_manual(values = c("TRUE" = "red", "FALSE" = "blue")) +
-                     labs(x = "Hours", y = "Frequency of Cough") +
-                     ggtitle(paste("Cough Plot for", unique(grouped_df[[i]]$VISIT))) +
-                     theme_minimal()
+                         aes(x = factor(Var1, levels = unique(Var1)),
+                             y = Freq, color = sleep, group=1)) +
+            geom_line() +
+            geom_point() +
+            scale_color_manual(values = c("TRUE" = "red", "FALSE" = "blue")) +
+            labs(x = "Hours", y = "Frequency of Cough") +
+            ggtitle(paste("Cough Plot for" ,unique(grouped_df[[i]]$VISIT) ))+
+            theme_minimal()
           
-          
-          plot_list[[i]]<- plot
+          plot_list[[i]] <- plot
           
           hourly_count$Visit <- grouped_df[[i]]$VISIT[1]
           
@@ -238,24 +222,41 @@ server <- function(input, output, session) {
             cols_label(Var1 = "Time(hour)",
                        Freq = "Number of Cough")
         })
-        # 
-        # #plotting all the visits in same graph
-        # ggplotly(ggplot(cough_counts, 
-        #        aes(x = Var1, y = Freq, group = Visit, color = Visit)) +
-        #   geom_line() +
-        #   geom_point()+
-        #   labs(x = "Hours", y = "Frequency of Cough") +
-        #   theme_minimal()
-        # )
         
-        #Plotting individual graphs
+        # #Trying plotly
+        # output$cough_plotly <- renderPlotly({
+        #   #plotting all the visits in same graph
+        #   p<- ggplotly(ggplot(cough_counts,
+        #              aes(x = Var1, y = Freq, group = Visit, color = Visit)) +
+        #     geom_line() +
+        #     geom_point()+
+        #     ggtitle("Comparision of all visits") +
+        #     labs(x = "Hours", y = "Frequency of Cough")+
+        #     theme_minimal()
+        #   )
+        # })
         
-        gridExtra :: grid.arrange(grobs = plot_list, ncol = 1)
+        #plotting all the visits in same graph
+        p<- ggplot(cough_counts,
+                   aes(x = Var1, y = Freq, group = Visit, color = Visit)) +
+          geom_line() +
+          geom_point()+
+          ggtitle("Comparision of all visits") +
+          labs(x = "Hours", y = "Frequency of Cough")+
+          theme_minimal()
+        
+        
+        
+        plot_list[[length(plot_list)+1]] <- p
+        #Output multiple graphs
+        gridExtra::grid.arrange(grobs = plot_list, ncol = 1)
+        
         
       })
       
       
     } else{
+      
       
       # Selecting required data as per input
       selected_data <- reactive({
@@ -302,6 +303,27 @@ server <- function(input, output, session) {
           start_time<- 0 # needs initialization because some subjects do not have a record
           
           start_time <-  as.integer(new_df$hour[new_df$FAOBJ == "Actual Recording Start Time"])
+          
+          #Getting time of coughs
+          time_cough <- new_df$FADTC[new_df$FAOBJ == "Cough"]
+          
+          
+          # Extract hours, minutes and seconds
+          hours <- as.numeric(format(time_cough, "%H"))
+          minutes <- as.numeric(format(time_cough, "%M"))
+          seconds <- as.numeric(format(time_cough, "%S"))
+          
+          # Create a data frame
+          df <- data.frame(hours, minutes, seconds)
+          
+          # Plot for time in hours and minutes
+          
+          output$cough_plotly <- renderPlotly(ggplotly(ggplot(df, aes(x = hours, y = minutes, color = seconds)) +
+                                                         geom_point() +
+                                                         scale_color_gradient(low = "blue", high = "red") +
+                                                         labs(x = "Hours", y = "Minutes", color = "Seconds") +
+                                                         theme_minimal()
+          )) 
           
           # Counting the occurrences of "cough" for each hour of the day
           hourly_counts <- table(new_df$hour[new_df$FAOBJ == "Cough"])
@@ -364,17 +386,17 @@ server <- function(input, output, session) {
             scale_color_manual(values = c("TRUE" = "red", "FALSE" = "blue")) +
             labs(x = "Hours", y = "Frequency of Cough") +
             theme_minimal()
-          
         } 
         
         else {
-         ggplot() +
+          ggplot() +
             labs(x = "Hour", y = "Count", title = "No data found for the given Visit ID and USUBJID")
-          
-          }
+        }
       })
       
     }
+    
+    output$about <- renderText("This application is designed to visualize pattern in the cough behaviours of the subjects")
   })
   
   
