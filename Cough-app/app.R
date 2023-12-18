@@ -50,28 +50,34 @@ ui <- fluidPage(
     tabPanel("Visualization",
              sidebarLayout(
                sidebarPanel(
-                 h3("Select Options"),
-                 
-                 #Selecting required visit and subject for observation as input
-                 selectInput(inputId = "SubjectID", 
-                             label = "Select Subject ID", 
-                             choices = subject_id),
-                 
-                 # selectInput("Session", "Select Session ID",choices = session_id),
-                 
-                 # Condition Statement for popping out another input 
-                 selectInput(inputId = "Condition",
-                             label = "Select Choice",
-                             choices = c("Single Insight", "Comparision")),
-                 
-                 conditionalPanel(
-                   condition = "input.Condition == 'Single Insight'",
-                   selectInput(inputId = "Visit",
-                               label = "Select Visit Number", 
-                               choices = visit_id)
+                 fluidRow( h3("Select Options"),
+                           
+                           #Selecting required visit and subject for observation as input
+                           selectInput(inputId = "SubjectID", 
+                                       label = "Select Subject ID", 
+                                       choices = subject_id),
+                           
+                           # selectInput("Session", "Select Session ID",choices = session_id),
+                           
+                           # Condition Statement for popping out another input 
+                           selectInput(inputId = "Condition",
+                                       label = "Select Choice",
+                                       choices = c("Single Insight", "Comparision")),
+                           
+                           conditionalPanel(
+                             condition = "input.Condition == 'Single Insight'",
+                             selectInput(inputId = "Visit",
+                                         label = "Select Visit Number", 
+                                         choices = visit_id)
+                           )
+                 ),
+                 fluidRow(h3("Subject Characteristics:"),
+                          
+                          #Output subject Characteristics
+                          gt_output("characteristics_table")
                  )
+                 
                ),
-               
                
                
                mainPanel(
@@ -130,8 +136,15 @@ server <- function(input, output, session) {
         cough_data[cough_data$USUBJID == input$SubjectID,]
       })
       
+      #Selecting required extension data
+      
+      selected_extension <- reactive({
+        extension_data[extension_data$SUBJID == input$SubjectID,]
+      })
+      
       output$cough_plot <- renderPlot({
         new_df <- selected_data()
+        extension <- selected_extension()
         
         # Converting the 'fadtc' column to POSIXct format
         new_df$FADTC <- as.POSIXct(new_df$FADTC, format = "%Y-%m-%dT%H:%M:%S")
@@ -224,6 +237,12 @@ server <- function(input, output, session) {
                        Freq = "Number of Cough")
         })
         
+        #Characteristics Table
+        output$characteristics_table <- render_gt({
+          gt_table <- gt(extension)
+          
+        }) 
+        
         # #Trying plotly
         # output$cough_plotly <- renderPlotly({
         #   #plotting all the visits in same graph
@@ -265,6 +284,12 @@ server <- function(input, output, session) {
                      cough_data$USUBJID == input$SubjectID,]
       })
       
+      #Selecting required extension data
+      
+      selected_extension <- reactive({
+        extension_data[extension_data$SUBJID == input$SubjectID,]
+      })
+      
       
       # #Trying dynamic Visit according to the Subject ID
       # selected_data <- reactive({
@@ -288,6 +313,8 @@ server <- function(input, output, session) {
       # Creating the plot
       output$cough_plot <- renderPlot({
         new_df <- selected_data()
+        extension <- selected_extension()
+        
         
         if (nrow(new_df) > 0) {
           # Converting the 'fadtc' column to POSIXct format
@@ -308,7 +335,6 @@ server <- function(input, output, session) {
           #Getting time of coughs
           time_cough <- new_df$FADTC[new_df$FAOBJ == "Cough"]
           
-          
           # Extract hours, minutes and seconds
           hours <- as.numeric(format(time_cough, "%H"))
           minutes <- as.numeric(format(time_cough, "%M"))
@@ -319,6 +345,7 @@ server <- function(input, output, session) {
           
           # Plot for time in hours and minutes
           
+          
           output$cough_plotly <- renderPlotly(ggplotly(ggplot(df, aes(x = hours, y = minutes, color = seconds)) +
                                                          geom_point() +
                                                          scale_color_gradient(low = "blue", high = "red") +
@@ -326,8 +353,10 @@ server <- function(input, output, session) {
                                                          theme_minimal()
           )) 
           
-          #Plot with bouts
-          data<- format(time_cough, "%H:%M:%S")
+          #Plot with cough bouts
+          
+          data <- format(time_cough, "%H:%M:%S")
+          
           # Convert to datetime
           data <- hms(data)
           
@@ -342,12 +371,9 @@ server <- function(input, output, session) {
           # Calculate time differences and group
           data <- data %>%
             mutate(diff = c(0, as.numeric(difftime(time[-1], time[-length(time)], units = "secs")))) %>%
-            mutate(group = ifelse(diff <= 6 & diff > 1, TRUE, FALSE)) %>%
+            mutate(group = ifelse(diff <= 6 & diff > 0, TRUE, FALSE)) %>%
             mutate(group = ifelse(lead(group, default = group[n()]), TRUE, group))
           
-          
-          
-          data
           
           # Plot
           output$bout_cough <- renderPlotly(ggplotly(ggplot(data, aes(x = time, y = index, color = as.factor(group))) +
@@ -356,6 +382,7 @@ server <- function(input, output, session) {
                                                        labs(x = "Time (Hours:Minutes:Seconds)", y = "Index", color = "Group") +
                                                        theme_minimal()
           )) 
+          
           
           # Counting the occurrences of "cough" for each hour of the day
           hourly_counts <- table(new_df$hour[new_df$FAOBJ == "Cough"])
@@ -408,6 +435,12 @@ server <- function(input, output, session) {
                          Freq = "Number of Cough")
           })
           
+          #Characteristics Table
+          output$characteristics_table <- render_gt({
+            gt_table <- gt(extension)
+            
+          }) 
+          
           
           # Plot with sleep indicators
           ggplot(hourly_counts, 
@@ -427,6 +460,7 @@ server <- function(input, output, session) {
       })
       
     }
+    
     
     output$about <- renderText("This application is designed to visualize pattern in the cough behaviours of the subjects")
   })
