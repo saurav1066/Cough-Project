@@ -42,50 +42,134 @@ subject_id
 visit_id <- unique(cough_data$VISIT)
 visit_id
 
-#UI
+# #UI without fixed sidebar
+# ui <- fluidPage(
+#   
+#   titlePanel("Cough Data Application"),
+#   tabsetPanel(
+#     tabPanel("Visualization",
+#              sidebarLayout(
+#                sidebarPanel(
+#                  fluidRow( h3("Select Options"),
+#                            
+#                            #Selecting required visit and subject for observation as input
+#                            selectInput(inputId = "SubjectID", 
+#                                        label = "Select Subject ID", 
+#                                        choices = subject_id),
+#                            
+#                            # selectInput("Session", "Select Session ID",choices = session_id),
+#                            
+#                            # Condition Statement for popping out another input 
+#                            selectInput(inputId = "Condition",
+#                                        label = "Select Choice",
+#                                        choices = c("Single Insight", "Comparision")),
+#                            
+#                            conditionalPanel(
+#                              condition = "input.Condition == 'Single Insight'",
+#                              selectInput(inputId = "Visit",
+#                                          label = "Select Visit Number", 
+#                                          choices = visit_id)
+#                            )
+#                  ),
+#                  fluidRow(h3("Subject Characteristics:"),
+#                           
+#                           #Output subject Characteristics
+#                           gt_output("characteristics_table")
+#                  )
+#                  
+#                ),
+#                
+#                
+#                mainPanel(
+#                  h3("Generated Plot"),
+#                  
+#                  # selectInput(inputId = "Visit", 
+#                  #             label = "Select Visit Number", 
+#                  #             choices = visit_id),
+#                  
+#                  #generating plot as output
+#                  plotOutput(outputId = "cough_plot"),
+#                  
+#                  
+#                  
+#                  # #generating a table output
+#                  # tableOutput("cough_table")
+#                  
+#                )
+#                
+#              )
+#              
+#     ),
+#     
+#     tabPanel("Plots",
+#              mainPanel(
+#                h3("Other Plots"),
+#                plotlyOutput(outputId = "cough_plotly"),
+#                plotlyOutput(outputId = "bout_cough")
+#              )
+#     ),
+#     
+#     tabPanel("Tables",
+#              mainPanel(
+#                h3("Table for the cough counts per hour"),
+#                gt_output("gt_table")
+#              )
+#     ),
+#     
+#     tabPanel("About",
+#              mainPanel(
+#                h3("About the Application"),
+#                textOutput('about')
+#              )
+#     )
+#   )
+#   
+# )
+
+#UI With fixed side bar
 ui <- fluidPage(
   
   titlePanel("Cough Data Application"),
-  tabsetPanel(
-    tabPanel("Visualization",
-             sidebarLayout(
-               sidebarPanel(
-                 fluidRow( h3("Select Options"),
-                           
-                           #Selecting required visit and subject for observation as input
-                           selectInput(inputId = "SubjectID", 
-                                       label = "Select Subject ID", 
-                                       choices = subject_id),
-                           
-                           # selectInput("Session", "Select Session ID",choices = session_id),
-                           
-                           # Condition Statement for popping out another input 
-                           selectInput(inputId = "Condition",
-                                       label = "Select Choice",
-                                       choices = c("Single Insight", "Comparision")),
-                           
-                           conditionalPanel(
-                             condition = "input.Condition == 'Single Insight'",
-                             selectInput(inputId = "Visit",
-                                         label = "Select Visit Number", 
-                                         choices = visit_id)
-                           )
-                 ),
-                 fluidRow(h3("Subject Characteristics:"),
-                          
-                          #Output subject Characteristics
-                          gt_output("characteristics_table")
-                 )
-                 
-               ),
+  
+  sidebarLayout(
+    sidebarPanel(
+      fluidRow( h3("Select Options"),
+                
+                #Selecting required visit and subject for observation as input
+                selectInput(inputId = "SubjectID",
+                            label = "Select Subject ID",
+                            choices = subject_id),
+                
+                # selectInput("Session", "Select Session ID",choices = session_id),
+                
+                # Condition Statement for popping out another input
+                selectInput(inputId = "Condition",
+                            label = "Select Choice",
+                            choices = c("Single Insight", "Comparision")),
+                
+                conditionalPanel(
+                  condition = "input.Condition == 'Single Insight'",
+                  selectInput(inputId = "Visit",
+                              label = "Select Visit Number",
+                              choices = visit_id)
+                )
+      ),
+      fluidRow(h3("Subject Characteristics:"),
                
-               
-               mainPanel(
+               #Output subject Characteristics
+               gt_output("characteristics_table")
+      )
+      
+    ),
+    
+    mainPanel(
+      tabsetPanel(
+        tabPanel("Visualization",
                  h3("Generated Plot"),
                  
-                 # selectInput(inputId = "Visit", 
-                 #             label = "Select Visit Number", 
-                 #             choices = visit_id),
+                 # selectInput(inputId = "Visit",
+                 # label = "Select Visit Number",
+                 # choices = visit_id),
                  
                  #generating plot as output
                  plotOutput(outputId = "cough_plot"),
@@ -95,36 +179,28 @@ ui <- fluidPage(
                  # #generating a table output
                  # tableOutput("cough_table")
                  
-               )
-               
-             )
-             
-    ),
-    
-    tabPanel("Plots",
-             mainPanel(
-               h3("Other Plots"),
-               plotlyOutput(outputId = "cough_plotly"),
-               plotlyOutput(outputId = "bout_cough")
-             )
-    ),
-    
-    tabPanel("Tables",
-             mainPanel(
-               h3("Table for the cough counts per hour"),
-               gt_output("gt_table")
-             )
-    ),
-    
-    tabPanel("About",
-             mainPanel(
-               h3("About the Application"),
-               textOutput('about')
-             )
+        ),
+        
+        tabPanel("Plots",
+                 h3("Other Plots"),
+                 plotlyOutput(outputId = "cough_plotly"),
+                 plotlyOutput(outputId = "bout_cough")
+        ),
+        
+        tabPanel("Tables",
+                 h3("Table for the cough counts per hour"),
+                 gt_output("gt_table")
+        ),
+        
+        tabPanel("About",
+                 h3("About the Application"),
+                 textOutput('about')
+        )
+      )
     )
   )
-  
 )
+
 
 #Server
 server <- function(input, output, session) {
