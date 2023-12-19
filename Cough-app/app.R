@@ -287,6 +287,7 @@ server <- function(input, output, session) {
             scale_color_manual(values = c("TRUE" = "red", "FALSE" = "blue")) +
             labs(x = "Hours", y = "Frequency of Cough") +
             ggtitle(paste("Cough Plot for" ,unique(grouped_df[[i]]$VISIT) ))+
+            scale_y_continuous(limits = c(0,300))+
             theme_minimal()
           
           plot_list[[i]] <- plot
@@ -526,6 +527,7 @@ server <- function(input, output, session) {
             geom_point() +
             scale_color_manual(values = c("TRUE" = "red", "FALSE" = "blue")) +
             labs(x = "Hours", y = "Frequency of Cough") +
+            scale_y_continuous(limits = c(0,300))+
             theme_minimal()
         } 
         
