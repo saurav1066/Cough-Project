@@ -66,7 +66,16 @@ server <- function(input, output, session) {
       abdominal_pain <- input_file[input_file$QSTEST == "CDAI01-Daily Average Abdominal Pain",]
       well_being <- input_file[input_file$QSTEST == "CDAI01-Daily Average General Well-being",]
       
-     
+      
+      #Running average
+      stool <- stool %>%
+        arrange(QSDY) %>%
+        mutate((avg = ifelse(row_number() >= 7 & !is.na(QSSTRESN),
+                             rollapply(QSSTRESN, width = 7,
+                                       FUN = function(x) if(sum(!is.na(x)) >= 4)
+                                         mean(x, na.rm = TRUE)
+                                       else NA, align = "right", fill = NA),
+                             NA)))
       
       print(stool)
     })
