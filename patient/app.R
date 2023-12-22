@@ -77,7 +77,25 @@ server <- function(input, output, session) {
                                        else NA, align = "right", fill = NA),
                              NA)))
       
-      print(stool)
+      abdominal_pain <- abdominal_pain %>%
+        arrange(QSDY) %>%
+        mutate((avg = ifelse(row_number() >= 7 & !is.na(QSSTRESN),
+                             rollapply(QSSTRESN, width = 7,
+                                       FUN = function(x) if(sum(!is.na(x)) >= 4)
+                                         mean(x, na.rm = TRUE)
+                                       else NA, align = "right", fill = NA),
+                             NA)))
+      
+      well_being <- well_being %>%
+        arrange(QSDY) %>%
+        mutate((avg = ifelse(row_number() >= 7 & !is.na(QSSTRESN),
+                             rollapply(QSSTRESN, width = 7,
+                                       FUN = function(x) if(sum(!is.na(x)) >= 4)
+                                         mean(x, na.rm = TRUE)
+                                       else NA, align = "right", fill = NA),
+                             NA)))
+      
+      
     })
     
   })
