@@ -13,6 +13,7 @@ library(shiny)
 library(readxl)
 library(dplyr)
 library(zoo)
+library(ggplot2)
 
 #Reading required excel files
 ds <- read_excel("ds.xlsx")
@@ -95,6 +96,32 @@ server <- function(input, output, session) {
                                        else NA, align = "right", fill = NA),
                              NA)))
       
+      
+    #Plotting individual datasets
+      
+     ggplot(data = well_being,
+            aes(x = QSDY, y = well_being[,ncol(well_being)]))+
+       scale_x_continuous(limits = c(1,max(well_being["QSDY"])))+
+       geom_point()+
+       geom_line()+
+       labs(x = "VISIT",  y = "seven day average")+
+       theme_minimal()
+     
+     ggplot(data = stool,
+            aes(x = QSDY, y = stool[,ncol(stool)]))+
+       scale_x_continuous(limits = c(1,max(stool["QSDY"])))+
+       geom_point()+
+       geom_line()+
+       labs(x = "VISIT",  y = "seven day average")+
+       theme_minimal()
+     
+     ggplot(data = well_being,
+            aes(x = QSDY, y = well_being[,ncol(well_being)]))+
+       scale_x_continuous(limits = c(1,max(well_being["QSDY"])))+
+       geom_point()+
+       geom_line()+
+       labs(x = "VISIT",  y = "seven day average")+
+       theme_minimal()
       
     })
     
