@@ -96,6 +96,28 @@ server <- function(input, output, session) {
                                        else NA, align = "right", fill = NA),
                              NA)))
       
+      #New running average on visit widow
+      stool$running_average <- sapply(1:nrow(stool), function(row){
+        
+        #GET QSDY values for current row
+        current_qsd_value <- stool$QSDY[row]
+        
+        #Get rows for past 7 QSDY 
+        past_rows <- which(stool$QSDY %in% (current_qsd_value-1):(current_qsd_value-7))
+        
+        #condition for rejection
+        
+        if(length(past_rows) < 4){
+          return(0)
+        }
+        
+        #otherwise compute mean
+        return(mean(stool[past_rows,"QSORRES"]))
+      })
+      
+      
+      
+      
       
     #Plotting individual datasets
       
