@@ -61,6 +61,9 @@ ui <- fluidPage(
                 selectInput(inputId = "subject_id",
                             label = "Select Subject ID",
                             choices = subject_list$USUBJID)
+      ),
+      fluidRow(
+        checkboxGroupInput("checkID", label = "Select Choices", choices = c("Stool", "Abdominal-Pain", "Well-Being"), selected = "Stool")
       )
       
     ),
@@ -82,10 +85,15 @@ server <- function(input, output, session) {
   observe({
     selected_subject <- reactive({
       input_file[input_file$USUBJID == input$subject_id,]
+      
     })
+    
+    selected_box <- reactive({input$checkID})
     
     output$plot <- renderPlotly({
       input_file <- selected_subject()
+      option <- selected_box()
+      
       
       #creating 3 different dataframes for the three required subsets
       stool <- input_file[input_file$QSTEST == "CDAI01-Daily Number of Stools",]
@@ -142,6 +150,26 @@ server <- function(input, output, session) {
         full_join(abdominal_pain, by = "QSDY") %>%
         full_join(well_being, by = "QSDY")
       
+      #Renaming the column names to match the choices
+      colnames(merged_df) <- c("QSDY", "Stool", "Abdominal-Pain", "Well-Being")
+      
+      
+      # Checking if any checkboxes are selected
+      if (is.null(option)) {
+        return(NULL)
+      }
+      
+      # Converting data to long format
+      df_long <- tidyr::pivot_longer(merged_df, cols = option)
+      
+      # Create a plot based on the selected checkboxes
+      ggplot(df_long, aes(x = QSDY, y = value, color = name)) +
+        scale_x_continuous(limits = c(1, max(merged_df$QSDY)))+
+        geom_line() +
+        labs(title = paste( paste(option, collapse = ", ")), x = "QSDY", y = "Running Average") +
+        scale_color_discrete(name = "Variable")+
+        theme_minimal()
+      
       
       # # Plotting individual plots
       #
@@ -166,16 +194,18 @@ server <- function(input, output, session) {
       # labs(x = "Visit", y = 'Seven day average')+
       # theme_minimal())
       
-      
-      # Converting data to long format
-      df_long <- tidyr::pivot_longer(merged_df, cols = c(running_average_stool, running_average_abdominal_pain, running_average_well_being))
-      
-      # Plotting together
-      ggplot(df_long, aes(x = QSDY, y = value, color = name)) +
-        # geom_point()+
-        geom_line() +
-        labs(x = "QSDY", y = "Running Average", color = "Measurement") +
-        theme_minimal()
+      #
+      # # Converting data to long format
+      # df_long <- tidyr::pivot_longer(merged_df, cols = c(Stool, Abdominal-Pain, Well-Being))
+      #
+      #
+      # # Plotting together
+      # ggplot(df_long, aes(x = QSDY, y = value, color = name)) +
+      # # geom_point()+
+      # geom_line() +
+      # labs(x = "QSDY", y = "Running Average", color = "Measurement") +
+      # theme_minimal()
+      #
       
       
       
