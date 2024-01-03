@@ -136,7 +136,48 @@ server <- function(input, output, session) {
       well_being <- well_being %>% select(QSDY, running_average_well_being)
       
       
-    
+      
+      #Joining the three dataframes with required columns
+      merged_df <- stool %>%
+        full_join(abdominal_pain, by = "QSDY") %>%
+        full_join(well_being, by = "QSDY")
+      
+      
+      # # Plotting individual plots
+      #
+      # ggplot(data = merged_df, aes(x = QSDY, y = running_average_stool))+
+      # scale_x_continuous(limits = c(1,max(stool["QSDY"])))+
+      # geom_point()+
+      # geom_line()+
+      # labs(x = "Visit", y = 'Seven visit average')+
+      # theme_minimal()
+      
+      # ggplot(data = abdominal_pain, aes(x = QSDY, y = abdominal_pain[,ncol(abdominal_pain)]))+
+      # scale_x_continuous(limits = c(1,max(abdominal_pain["QSDY"])))+
+      # geom_point()+
+      # geom_line()+
+      # labs(x = "Visit", y = 'Seven day average')+
+      # theme_minimal()
+      
+      # ggplotly(ggplot(data = well_being, aes(x = QSDY, y = well_being[,ncol(well_being)]))+
+      # scale_x_continuous(limits = c(1,max(well_being["QSDY"])))+
+      # geom_point()+
+      # geom_line()+
+      # labs(x = "Visit", y = 'Seven day average')+
+      # theme_minimal())
+      
+      
+      # Converting data to long format
+      df_long <- tidyr::pivot_longer(merged_df, cols = c(running_average_stool, running_average_abdominal_pain, running_average_well_being))
+      
+      # Plotting together
+      ggplot(df_long, aes(x = QSDY, y = value, color = name)) +
+        # geom_point()+
+        geom_line() +
+        labs(x = "QSDY", y = "Running Average", color = "Measurement") +
+        theme_minimal()
+      
+      
       
       
     })
