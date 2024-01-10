@@ -8,6 +8,7 @@
 #
 
 library(readxl)
+library(plotly)
 
 #Loaded required files
 coughs_data <- read_excel('cough-project/1465-0008-coughdata.xlsx')
@@ -42,8 +43,9 @@ cough_activity_data <- cough_activity_data[c('time','USUBJID', 'FAOBJ', 'STEPS',
 cough_activity_data
 
 
-ggplot(cough_activity_data, aes(x = time, y = CALORIES)) +
+ggplotly(ggplot(cough_activity_data, aes(x = time, y = CALORIES)) +
   geom_point() +
   geom_line()+
   xlab("Time") +
   ylab("Calories")
+)
