@@ -51,14 +51,27 @@ cough_activity_data
 # ylab("Calories")
 # )
 
-#Simple Plot
-cough_activity_data %>%
-group_by(time) %>%
-summarise(count = n(), total_calories = sum(CALORIES)) %>%
-ggplot(aes(x = time)) +
-geom_line(aes(y = count), color = "blue", group = 1) +
-geom_line(aes(y = total_calories), color = "red", linetype = "dashed", group = 1) +
-scale_y_continuous(sec.axis = sec_axis(~., name = "Total Calories")) +
-labs(y = "Count of Cough")
+# #Simple Plot
+# cough_activity_data %>%
+# group_by(time) %>%
+# summarise(count = n(), total_calories = sum(CALORIES)) %>%
+# ggplot(aes(x = time)) +
+# geom_line(aes(y = count), color = "blue", group = 1) +
+# geom_line(aes(y = total_calories), color = "red", linetype = "dashed", group = 1) +
+# scale_y_continuous(sec.axis = sec_axis(~., name = "Total Calories")) +
+# labs(y = "Count of Cough")
 
+# Creating cough Count and calorie total
+cough_activity_data_summary <- cough_activity_data %>%
+group_by(time) %>%
+summarise(count_cough = n(),
+total_calories = sum(CALORIES))
+
+# Creating the plot
+fig <- plot_ly(cough_activity_data_summary, x = ~time, y = ~count_cough, name = 'Count of cough', type = 'scatter', mode = 'lines') %>%
+add_trace(y = ~total_calories, name = 'Total Calories', mode = 'lines', yaxis = 'y2') %>%
+layout(title = "Count of Cough and Total Calories over Time",
+yaxis2 = list(overlaying = "y", side = "right"))
+
+fig
 
