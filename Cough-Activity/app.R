@@ -9,6 +9,7 @@
 
 library(readxl)
 library(plotly)
+library(dplyr)
 
 #Loaded required files
 coughs_data <- read_excel('cough-project/1465-0008-coughdata.xlsx')
@@ -20,7 +21,7 @@ activity_data <- data.frame(activity_data)
 
 
 #selected a random patient with many values
-cough_data_trial <- coughs_data[coughs_data$VISIT == "Visit 2" & coughs_data$USUBJID == 6004009,]
+cough_data_trial <- coughs_data[coughs_data$VISIT == "Visit 2" & coughs_data$USUBJID == 6004009 &coughs_data$FAOBJ=='Cough',]
 cough_data_trial
 
 #Converted time for comparision
@@ -43,9 +44,21 @@ cough_activity_data <- cough_activity_data[c('time','USUBJID', 'FAOBJ', 'STEPS',
 cough_activity_data
 
 
-ggplotly(ggplot(cough_activity_data, aes(x = time, y = CALORIES)) +
-  geom_point() +
-  geom_line()+
-  xlab("Time") +
-  ylab("Calories")
-)
+# ggplotly(ggplot(cough_activity_data, aes(x = time, y = CALORIES)) +
+# geom_point() +
+# geom_line()+
+# xlab("Time") +
+# ylab("Calories")
+# )
+
+#Simple Plot
+cough_activity_data %>%
+group_by(time) %>%
+summarise(count = n(), total_calories = sum(CALORIES)) %>%
+ggplot(aes(x = time)) +
+geom_line(aes(y = count), color = "blue", group = 1) +
+geom_line(aes(y = total_calories), color = "red", linetype = "dashed", group = 1) +
+scale_y_continuous(sec.axis = sec_axis(~., name = "Total Calories")) +
+labs(y = "Count of Cough")
+
+
