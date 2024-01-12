@@ -164,6 +164,7 @@ server <- function(input, output, session) {
       
       # Create a plot based on the selected checkboxes
       ggplot(df_long, aes(x = QSDY, y = value, color = name)) +
+        geom_point(data = df_long[is.na(df_long$value),], aes(y=0), shape = 3, color = 'black', alpha = 0.5)+
         scale_x_continuous(limits = c(1, max(merged_df$QSDY)))+
         geom_line() +
         labs(title = paste( paste(option, collapse = ", ")), x = "QSDY", y = "Running Average") +
