@@ -51,15 +51,17 @@ cough_activity_data
 # ylab("Calories")
 # )
 
-# #Simple Plot
-# cough_activity_data %>%
-# group_by(time) %>%
-# summarise(count = n(), total_calories = sum(CALORIES)) %>%
-# ggplot(aes(x = time)) +
-# geom_line(aes(y = count), color = "blue", group = 1) +
-# geom_line(aes(y = total_calories), color = "red", linetype = "dashed", group = 1) +
-# scale_y_continuous(sec.axis = sec_axis(~., name = "Total Calories")) +
-# labs(y = "Count of Cough")
+#Simple Plot
+cough_activity_data %>%
+group_by(time) %>%
+summarise(count = n(), total_calories = sum(CALORIES)) %>%
+ggplot(aes(x = time)) +
+geom_point(aes(y = count))+
+geom_line(aes(y = count), color = "blue", group = 1) +
+geom_point(aes(y = total_calories))+
+geom_line(aes(y = total_calories), color = "red", linetype = "dashed", group = 1) +
+scale_y_continuous(sec.axis = sec_axis(~., name = "Total Calories")) +
+labs(y = "Count of Cough")
 
 # # Creating cough Count and calorie total
 # cough_activity_data_summary <- cough_activity_data %>%
@@ -101,18 +103,18 @@ cough_activity_data_summary <- cough_activity_data_summary %>%
   gather(key = "type", value = "value", count_cough, total_calories)
 
 # Creating the ggplot
-p <- ggplot(cough_activity_data_summary, aes(x = time, y = value, color = type)) +
-  geom_line(group=1) +
-  scale_color_manual(values = c("blue", "red")) +
-  labs(title = "Count of Cough and Total Calories over Time",
-       y = "Count",
-       color = "Type") +
-  theme_minimal()
-
-# Converting to plotly
-fig <- ggplotly(p)
-
-fig
+# p <- ggplot(cough_activity_data_summary, aes(x = time, y = value, color = type)) +
+#   geom_line(group=1) +
+#   scale_color_manual(values = c("blue", "red")) +
+#   labs(title = "Count of Cough and Total Calories over Time",
+#        y = "Count",
+#        color = "Type") +
+#   theme_minimal()
+# 
+# # Converting to plotly
+# fig <- ggplotly(p)
+# 
+# fig
 
 
 
