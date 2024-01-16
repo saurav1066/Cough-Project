@@ -51,7 +51,7 @@ cough_activity_data
 # ylab("Calories")
 # )
 
-#Simple Plot
+#Simple Plot for calories
 cough_activity_data %>%
 group_by(time) %>%
 summarise(count = n(), total_calories = sum(CALORIES)) %>%
@@ -116,6 +116,17 @@ cough_activity_data_summary <- cough_activity_data_summary %>%
 # 
 # fig
 
+#Simple Plot for MET
+cough_activity_data %>%
+  group_by(time) %>%
+  summarise(count = n(), ave_met = mean(MET)) %>%
+  ggplot(aes(x = time)) +
+  geom_point(aes(y = count))+
+  geom_line(aes(y = count), color = "blue", group = 1) +
+  geom_point(aes(y = avg_met))+
+  geom_line(aes(y = avg_met), color = "red", linetype = "dashed", group = 1) +
+  scale_y_continuous(sec.axis = sec_axis(~., name = "Avergae Met")) +
+  labs(y = "Count of Cough")
 
 
 
