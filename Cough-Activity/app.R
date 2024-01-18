@@ -33,6 +33,14 @@ cough_data_trial$time
 
 #Converted time for comparision
 activity_data$TIMESTAMPUTC <- as.POSIXct(activity_data$TIMESTAMPUTC, format = "%Y-%m-%d %H:%M:%S")
+
+#Converting timestamp to date 
+activity_data$date <- as.Date(activity_data$TIMESTAMPUTC)
+
+#Filtering dataframe with a single date
+activity_data <- activity_data[activity_data$date == as.Date('2022-03-30'),]
+
+
 activity_data$time <- format(activity_data$TIMESTAMPUTC,"%H:%M:%S" )
 activity_data$time
 
@@ -54,7 +62,7 @@ cough_activity_data
 #Simple Plot for calories
 cough_activity_data %>%
 group_by(time) %>%
-summarise(count = n(), total_calories = sum(CALORIES)) %>%
+summarise(count = n(), total_calories = mean(CALORIES)) %>%
 ggplot(aes(x = time)) +
 geom_point(aes(y = count))+
 geom_line(aes(y = count), color = "blue", group = 1) +
