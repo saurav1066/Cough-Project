@@ -544,9 +544,9 @@ server <- function(input, output, session) {
   })
   
   
-  # # Table of hourly counts as table
-  # 
-  # output$cough_table <-renderTable((table(hourly_counts) )) 
+  # Table of hourly counts as table
+
+  output$cough_table <-renderTable((table(hourly_counts) ))
 }
 
 
