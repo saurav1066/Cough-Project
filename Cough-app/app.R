@@ -152,6 +152,12 @@ ui <- fluidPage(
                   selectInput(inputId = "Visit",
                               label = "Select Visit Number",
                               choices = visit_id)
+                ),
+                conditionalPanel(
+                  condition = "input.Condition == 'Baseline'",
+                  selectInput(inputId = "Visit",
+                              label = "Select Visit Number",
+                              choices = visit_id)
                 )
       ),
       fluidRow(h3("Subject Characteristics:"),
