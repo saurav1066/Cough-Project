@@ -145,7 +145,7 @@ ui <- fluidPage(
                 # Condition Statement for popping out another input
                 selectInput(inputId = "Condition",
                             label = "Select Choice",
-                            choices = c("Single Insight", "Comparision")),
+                            choices = c("Single Insight", "Comparision", "Baseline")),
                 
                 conditionalPanel(
                   condition = "input.Condition == 'Single Insight'",
