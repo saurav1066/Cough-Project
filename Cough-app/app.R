@@ -213,7 +213,20 @@ server <- function(input, output, session) {
   
   
   observe({
-    if(input$Condition == "Comparision"){
+    if(input$Condition == "Baseline"){
+      selected_data <- reactive({
+        cough_data[cough_data$VISIT == input$visit_id,]
+      })
+      
+      #Creating baseline plots
+      output$cough_plot <- renderPlot({
+        new_df <- selected_data()
+      })
+      
+      
+    }
+    
+    else if(input$Condition == "Comparision"){
       selected_data <- reactive({
         cough_data[cough_data$USUBJID == input$SubjectID,]
       })
