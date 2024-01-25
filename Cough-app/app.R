@@ -213,16 +213,103 @@ server <- function(input, output, session) {
   
   
   observe({
-    if(input$Condition == "Baseline"){
+    #Condition BAseline
+    if(input$Condition == 'Baseline'){
       selected_data <- reactive({
-        cough_data[cough_data$VISIT == input$visit_id,]
+        cough_data[cough_data$VISIT == input$Visit,]
       })
       
-      #Creating baseline plots
+      new_df <- selected_data()
+      # Converting the 'fadtc' column to POSIXct format
+      new_df$FADTC <- as.POSIXct(new_df$FADTC, format = "%Y-%m-%dT%H:%M:%S")
+      
+      # Creating a new column 'hour' to extract the hour from the timestamp
+      new_df$hour <- format(new_df$FADTC, "%H")
+      
+      
+      #Plotting all the plots for baseline
       output$cough_plot <- renderPlot({
-        new_df <- selected_data()
+        #Plot list to store plots
+        plot_list <- list()
+        #Creating baseline plots
+        for(subject in 1:length(subject_id)) {
+          df <- new_df[new_df$USUBJID == subject_id[subject],]
+          print(subject_id[subject])
+          
+          #Getting sleep, wake and start time of recording values
+          sleep_time <- as.integer(df$hour[df$FAOBJ == "Sleep"])
+          wake_time <- as.integer(df$hour[df$FAOBJ == "Wake"])
+          
+          
+          start_time<- 0 # needs initialization because some subjects do not have a record
+          
+          start_time <- as.integer(df$hour[df$FAOBJ == "Actual Recording Start Time"])
+          
+          
+          # Counting the occurrences of "cough" for each hour of the day
+          hourly_counts <- table(df$hour[df$FAOBJ == "Cough"])
+          hourly_counts <- data.frame(hourly_counts)
+          
+          #Converting the hour data to integer
+          hourly_counts$Var1 <- as.integer(as.character(hourly_counts$Var1))
+          
+          if (nrow(hourly_counts) == 0){
+            p<- ggplot() +
+              ggtitle(paste("Cough Plot for" ,subject_id[subject]) )+
+              labs(x = "Hour", y = "Count", title = "No data found for the given Visit ID and USUBJID")
+          }
+          else {
+            #Filling Missing Values
+            hourly_counts <- merge(hourly_counts,
+                                   data.frame("Var1" = 0:23),
+                                   by = 'Var1',
+                                   all.y = TRUE)
+            
+            hourly_counts$Freq[is.na(hourly_counts$Freq)] <- 0
+            
+            #Creating a Sleep pointer as a column in dataframe
+            hourly_counts$sleep <- ifelse((sleep_time > wake_time &
+                                             (hourly_counts$Var1 >= sleep_time |
+                                                hourly_counts$Var1 <= wake_time))
+                                          |
+                                            (sleep_time <= wake_time
+                                             & (hourly_counts$Var1 >= sleep_time
+                                                & hourly_counts$Var1 <= wake_time))
+                                          , TRUE, FALSE)
+            
+            #Simple rearranging according to the start of recording time
+            hourly_counts <- hourly_counts[order((hourly_counts$Var1 - start_time)
+                                                 %% nrow(hourly_counts)),]
+            
+            row.names(hourly_counts) <- 1:nrow(hourly_counts)
+            
+            
+            # Plot with sleep indicators for each visit
+            p<- ggplot(hourly_counts,
+                       aes(x = factor(Var1, levels = unique(Var1)),
+                           y = Freq, color = sleep, group=1)) +
+              geom_line() +
+              geom_point() +
+              ggtitle(paste("Cough Plot for" ,subject_id[subject]) )+
+              scale_color_manual(values = c("TRUE" = "red", "FALSE" = "blue")) +
+              labs(x = "Hours", y = "Frequency of Cough") +
+              scale_y_continuous(limits = c(0, 290))+
+              theme_minimal()
+            
+            
+            
+          }
+          plot_list[[subject]] <- p
+          
+        }
+        gridExtra::grid.arrange(grobs = plot_list)
+        
+        
+        
       })
       
+    }
+    
       
     }
     
