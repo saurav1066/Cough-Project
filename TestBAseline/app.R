@@ -29,9 +29,13 @@ sidebarLayout(
     # Condition Statement for popping out another input
     selectInput(inputId = "Condition",
                 label = "Select Choice",
-                choices = c("Single Insight", "Comparision", "Baseline")), hashtag#Condition Single Insight
+                choices = c("Single Insight", "Comparision", "Baseline")), 
+    
+    #Condition Single Insight
     conditionalPanel(
-      condition = "input.Condition == 'Single Insight'", hashtag#Selecting required visit and subject for observation as input
+      condition = "input.Condition == 'Single Insight'", 
+      
+      #Selecting required visit and subject for observation as input
       selectInput(inputId = "SubjectID",
                   label = "Select Subject ID",
                   choices = result$subject_id),
@@ -39,9 +43,13 @@ sidebarLayout(
       selectInput(inputId = "Visit",
                   label = "Select Visit Number",
                   choices = result$visit_id)
-    ), hashtag#Condition Comparision
+    ),
+    
+    #Condition Comparision
     conditionalPanel(
-      condition = "input.Condition == 'Comparision'", hashtag#Selecting required visit and subject for observation as input
+      condition = "input.Condition == 'Comparision'", 
+      
+      #Selecting required visit and subject for observation as input
       selectInput(inputId = "SubjectID",
                   label = "Select Subject ID",
                   choices = result$subject_id),
@@ -49,24 +57,34 @@ sidebarLayout(
       selectInput(inputId = "Visit",
                   label = "Select Visit Number",
                   choices = result$visit_id)
-    ), hashtag#Condition Baseline
+    ),
+    
+    #Condition Baseline
     conditionalPanel(
-      condition = "input.Condition == 'Baseline'", hashtag#Selecting baseline visit
+      condition = "input.Condition == 'Baseline'", 
+      
+      #Selecting baseline visit
       selectInput(inputId = "Visit",
                   label = "Select Visit Number",
                   choices = result$visit_id)
     )
   ),
   
-  mainPanel( hashtag#Condition Single Insight
+  mainPanel(
+    
+    #Condition Single Insight
              conditionalPanel(
                condition = "input.Condition == 'Single Insight'",
                plotOutput(outputId = "cough_plot")
-             ), hashtag#Condition Comparision
+             ), 
+             
+             #Condition Comparision
              conditionalPanel(
                condition = "input.Condition == 'Comparision'",
                plotOutput(outputId = "comparision_plot")
-             ), hashtag#Condition Baseline
+             ), 
+             
+             #Condition Baseline
              conditionalPanel(
                condition = "input.Condition == 'Baseline'",
                
@@ -126,13 +144,17 @@ server <- function(input, output, session) {
               ggtitle(paste("Cough Plot for" ,subject) )+
               labs(x = "Hour", y = "Count", title = "No data found for the given Visit ID and USUBJID")
           }
-          else { hashtag#Filling Missing Values
+          else { 
+            
+            #Filling Missing Values
             hourly_counts <- merge(hourly_counts,
                                    data.frame("Var1" = 0:23),
                                    by = 'Var1',
                                    all.y = TRUE)
             
-            hourly_counts$Freq[is.na(hourly_counts$Freq)] <- 0 hashtag#Creating a Sleep pointer as a column in dataframe
+            hourly_counts$Freq[is.na(hourly_counts$Freq)] <- 0 
+            
+            #Creating a Sleep pointer as a column in dataframe
             hourly_counts$sleep <- ifelse((sleep_time > wake_time &
                                              (hourly_counts$Var1 >= sleep_time |
                                                 hourly_counts$Var1 <= wake_time))
