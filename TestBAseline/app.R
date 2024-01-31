@@ -121,10 +121,28 @@ sidebarLayout(
     conditionalPanel(
       condition = "input.Condition == 'Baseline'", 
       
-      #Selecting baseline visit
-      selectInput(inputId = "Visit",
-                  label = "Select Visit Number",
-                  choices = result$visit_id)
+      # Condition Statement for popping out another input
+      selectInput(inputId = "baseline_condition",
+                  label = "Select Choice",
+                  choices = c("Visit","Sex"), 
+      
+      conditionalPanel(
+        condition = "input.baseline_condition == 'Visit'",
+        
+        #Selecting baseline visit
+        selectInput(inputId = "Visit",
+                    label = "Select Visit Number",
+                    choices = result$visit_id)
+      ),
+      
+      conditionalPanel(
+        condition = "input.baseline_condition == 'Sex'",
+        
+        #Selecting baseline visit
+        selectInput(inputId = "Sex",
+                    label = "Select Sex",
+                    choices = c("MAle", "Female"))
+      
     )
   ),
   
