@@ -2,6 +2,7 @@ library(shiny)
 library(readxl)
 library(haven)
 library(ggplot2) 
+library(gt)
 
 #Function that does all required preprocessing
 preprocessing <- function() { 
