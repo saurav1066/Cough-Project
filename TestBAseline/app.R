@@ -123,29 +123,58 @@ sidebarLayout(
     conditionalPanel(
       condition = "input.Condition == 'Baseline'", 
       
-      # Condition Statement for popping out another input
-      selectInput(inputId = "baseline_condition",
-                  label = "Select Choice",
-                  choices = c("Visit","Sex"), 
       
-      conditionalPanel(
-        condition = "input.baseline_condition == 'Visit'",
-        
-        #Selecting baseline visit
-        selectInput(inputId = "Visit",
-                    label = "Select Visit Number",
-                    choices = result$visit_id)
-      ),
+    #   #Dropdown MEnu
+    #   # Condition Statement for popping out another input
+    #   selectInput(inputId = "baseline_condition",
+    #               label = "Select Choice",
+    #               choices = c("Visit","Sex"), 
+    #   
+    #   conditionalPanel(
+    #     condition = "input.baseline_condition == 'Visit'",
+    #     
+    #     #Selecting baseline visit
+    #     selectInput(inputId = "Visit",
+    #                 label = "Select Visit Number",
+    #                 choices = result$visit_id)
+    #   ),
+    #   
+    #   conditionalPanel(
+    #     condition = "input.baseline_condition == 'Sex'",
+    #     
+    #     #Selecting baseline visit
+    #     selectInput(inputId = "Sex",
+    #                 label = "Select Sex",
+    #                 choices = c("MAle", "Female"))
+    #   
+    # )
+    
+    # Checkbox for Visit and Sex
+    checkboxGroupInput(inputId = "baseline_condition",
+                       label = "Select Baseline Choice",
+                       choices = c("Visit", "Sex")),
+    
+    # Conditionally display checkboxes for Visit
+    conditionalPanel(
+      condition = "input.baseline_condition.includes('Visit')",
       
-      conditionalPanel(
-        condition = "input.baseline_condition == 'Sex'",
-        
-        #Selecting baseline visit
-        selectInput(inputId = "Sex",
-                    label = "Select Sex",
-                    choices = c("MAle", "Female"))
+      # Checkboxes for Visit Number
+      checkboxGroupInput(inputId = "baseline_Visit",
+                         label = "Select Visit Number",
+                         choices = result$visit_id)
+    ),
+    
+    # Conditionally display checkboxes for Sex
+    conditionalPanel(
+      condition = "input.baseline_condition.includes('Sex')",
       
+      # Checkboxes for Sex
+      checkboxGroupInput(inputId = "baseline_Sex",
+                         label = "Select Sex",
+                         choices = c("Male", "Female"))
     )
+    
+    
   ),
   
   mainPanel(
