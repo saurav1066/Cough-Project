@@ -525,7 +525,93 @@ server <- function(input, output, session) {
         
         sex <- input$baseline_Sex
         
+        if(length(sex) <= 1){
+          
+          #Selecting Filtered sex data
+          selected_extension <- reactive({
+            result$extension_data[result$extension_data$SEX == input$baseline_Sex,]
+            
+          })
+          
+          extension <- selected_extension()
+          
+          # Generate UI elements dynamically
+          id_list <- lapply(extension$SUBJID, as.character)
+          
+          output$baseline_plot <- renderUI({
+            lapply(id_list, function(id) {
+              plotOutput(id)
+            })
+          })
+          
+          # Render plots for each ID
+          lapply(id_list, function(subject) {
+            
+            
+            output[[subject]] <- renderPlot({
+              df <- new_df[new_df$USUBJID == as.numeric(subject),]
+              
+              if(nrow(df) != 0) {
+                #grouping the dataframe based on visits
+                grouped_df <- split(df, df$VISIT,df$USUBJID)
+                
+                #Initilizing for later use to store plots and dataframes
+                cough_counts <- data.frame()
+                
+                
+                #getting hourly counts of each group of visits
+                for (i in 1:length(grouped_df)) {
+                  
+                  
+                  #Getting the hour where the subject slept
+                  sleep_time <- as.integer(grouped_df[[i]]$hour[grouped_df[[i]]$FAOBJ == "Sleep"])
+                  
+                  #Getting the hour where the subject woke up
+                  wake_time <- as.integer(grouped_df[[i]]$hour[grouped_df[[i]]$FAOBJ == "Wake"])
+                  
+                  #Getting the hour where the recording started
+                  start_time <- as.integer(grouped_df[[i]]$hour[grouped_df[[i]]$FAOBJ == "Actual Recording Start Time"])
+                  
+                  #Calling helper function
+                  hourly_count <- hourly_counts_table(grouped_df[[i]], sleep_time,wake_time, start_time)
+                  
+                  #Adding Visit Column in the hourly count  table
+                  hourly_count$Visit <- grouped_df[[i]]$VISIT[1]
+                  
+                  #Storing all cough counts in a separate dataframe
+                  cough_counts <- rbind(cough_counts, hourly_count)
+                }
+                
+                
+                #plotting all the visits in same graph
+                ggplot(cough_counts,
+                       aes(x = Var1, y = Freq, group = Visit, color = Visit)) +
+                  geom_line() +
+                  geom_point()+
+                  ggtitle(paste0("Comparision of all visits for subject ", subject)) +
+                  labs(x = "Hours", y = "Frequency of Cough")+
+                  theme_minimal()
+              }
+              else{
+                ggplot() +
+                  ggtitle(paste("Cough Plot for" ,subject) )+
+                  labs(x = "Hour", y = "Count", title = paste0("No data found for ", subject ))
+              }
+              
+              
+            })
+          })
+          
+          
+        }
         
+        
+        
+        else{
+          
+          
+          
+        }
         
         
       }
