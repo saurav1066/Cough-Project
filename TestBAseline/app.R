@@ -5,6 +5,10 @@ library(ggplot2)
 library(gt)
 
 
+
+# Helper Functions --------------------------------------------------------
+
+
 #Function that does all required preprocessing
 preprocessing <- function() {
   #reading the given excel file adn the sas file
@@ -80,6 +84,10 @@ hourly_counts_table <- function(new_df, sleep, wake, start) {
 
 #Calling the function above for access of variables
 result <- preprocessing()
+
+
+# ui ----------------------------------------------------------------------
+
 
 #UI
 ui <- fluidPage(
@@ -190,9 +198,16 @@ ui <- fluidPage(
 
 
 
+# Server ------------------------------------------------------------------
+
+
 #Server Function
 server <- function(input, output, session) {
   observe({
+    
+
+# Baseline ----------------------------------------------------------------
+
     
     #Condition BAseline dropdown
     if(input$Condition == 'Baseline'){
