@@ -232,12 +232,12 @@ server <- function(input, output, session) {
           
           output[[subject]] <- renderPlot({
             
-            # df <- new_df[new_df$USUBJID == as.numeric(subject),]
+            df <- new_df[new_df$USUBJID == as.numeric(subject),]
             
-            #Filtering dataframe so that only needed columns are selected
-            df <- new_df %>%
-              dplyr::select(c("FAOBJ", "USUBJID", "VISIT", "FADTC", "hour")) %>%
-              dplyr::filter(USUBJID == as.numeric(subject))
+            # #Filtering dataframe so that only needed columns are selected
+            # df <- new_df %>%
+            #   dplyr::select(c("FAOBJ", "USUBJID", "VISIT", "FADTC", "hour")) %>%
+            #   dplyr::filter(USUBJID == as.numeric(subject))
             
             #Getting sleep, wake and start time of recording values
             sleep_time <- as.integer(df$hour[df$FAOBJ == "Sleep"])
