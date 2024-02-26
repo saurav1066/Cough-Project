@@ -431,6 +431,31 @@ server <- function(input, output, session) {
         }
       })
       
+      
+      #Creating bout plot
+      output$bout_plot <- renderPlot({
+        
+        if(nrow(new_df) >0 ){
+          
+          #Getting cough times
+          cough_times <- new_df$FADTC[new_df$FAOBJ == "Cough"]
+          
+          #Formatting for conversion
+          cough_times <- format(cough_times, "%H:%M:%S")
+          
+          cough_times <- as.POSIXct(cough_times, format = "%H:%M:%S" )
+          
+          #Creating a dataframe
+          df <- data.frame(cough_times)
+          
+          #Creating a group variavle based on 6 second duration condition'
+          df <- df %>%
+            arrange(cough_times) %>%
+            mutate(group = cumsum(c(0, diff(cough_times) >6)))
+        }
+        
+      })
+      
     }
     
     
