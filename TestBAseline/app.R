@@ -173,7 +173,8 @@ ui <- fluidPage(
       #Condition Single Insight
       conditionalPanel(
         condition = "input.Condition == 'Single Insight'",
-        plotOutput(outputId = "cough_plot")
+        plotOutput(outputId = "cough_plot"),
+        plotOutput(outputID = "bout_plot")
       ),
       
       #Condition Comparision
