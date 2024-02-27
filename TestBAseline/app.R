@@ -452,6 +452,18 @@ server <- function(input, output, session) {
           df <- df %>%
             arrange(cough_times) %>%
             mutate(group = cumsum(c(0, diff(cough_times) >6)))
+          
+          #Filter the data to only include required
+          df_flitered <- df %>%
+            group_by(hour, group) %>%
+            filter(n() >=2)
+          
+          #Plot
+          ggplot(df_flitered, aes(x = hour, y = group, color = as.factor(group))) +
+            geom_point()+
+            scale_color_discrete(name = "Group") +
+            labs(x = "Hour",y = "Group")+
+            theme_minimal()
         }
         
       })
