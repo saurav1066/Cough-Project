@@ -461,6 +461,13 @@ server <- function(input, output, session) {
           #Extract minuutes
           df_filtered <- format(df_filtered$cough_times, "%M")
           
+          #Calculate the count of coughs in each group
+          df_filtered <- df_filtered %>%
+            group_by(group) %>%
+            mutate(group_count = n())
+
+          
+                    
           #Plot
           ggplot(df_filtered, aes(x = hour, y = minutes)) +
             geom_point()+
