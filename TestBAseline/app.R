@@ -408,7 +408,11 @@ server <- function(input, output, session) {
           
           #Characteristics Table
           output$characteristics_table <- render_gt({
-            gt_table <- gt(extension)
+            gt_table <- gt(extension) %>%
+              cols_align(
+                align = "center",
+                columns = everything()
+              )
             
           })
           
