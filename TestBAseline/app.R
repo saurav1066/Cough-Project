@@ -469,9 +469,10 @@ server <- function(input, output, session) {
           
                     
           #Plot
-          ggplot(df_filtered, aes(x = hour, y = minutes)) +
+          ggplot(df_filtered, aes(x = hour, y = minutes, color = as.factor(group_count))) +
             geom_point()+
             labs(x = "Hour",y = "Group")+
+            scale_color_discrete(name = "Cough Counts per Bout")+
             theme_minimal()
         }
         
