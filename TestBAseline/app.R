@@ -466,10 +466,12 @@ server <- function(input, output, session) {
             group_by(group) %>%
             mutate(group_count = n())
 
-          
+          #Simple rearranging according to start time
+          df_filtered <- df_filtered[order((df_filtered$hour - start_time) 
+                                           %% nrow(df_filtered)),]
                     
           #Plot
-          ggplot(df_filtered, aes(x = hour, y = minutes, color = as.factor(group_count))) +
+          ggplot(df_filtered, aes(x = factor(hour, levels = unique(hour)), y = minutes, color = as.factor(group_count))) +
             geom_point()+
             labs(x = "Hour",y = "Group")+
             scale_color_discrete(name = "Cough Counts per Bout")+
