@@ -441,6 +441,11 @@ server <- function(input, output, session) {
         
         if(nrow(new_df) >0 ){
           
+          start_time<- 0 # needs initialization because some subjects do not have a record
+          
+          start_time <-  as.integer(new_df$hour[new_df$FAOBJ == "Actual Recording Start Time"])
+          
+          
           #Getting cough times
           cough_times <- new_df$FADTC[new_df$FAOBJ == "Cough"]
           
