@@ -4,6 +4,7 @@ library(haven)
 library(ggplot2)
 library(gt)
 library(dplyr)
+library(plotly)
 
 
 
@@ -174,7 +175,7 @@ ui <- fluidPage(
       conditionalPanel(
         condition = "input.Condition == 'Single Insight'",
         plotOutput(outputId = "cough_plot"),
-        plotOutput(outputID = "bout_plot")
+        plotlyOutput(outputID = "bout_plot")
       ),
       
       #Condition Comparision
@@ -437,7 +438,7 @@ server <- function(input, output, session) {
       
       
       #Creating bout plot
-      output$bout_plot <- renderPlot({
+      output$bout_plot <- renderPlotly({
         
         if(nrow(new_df) >0 ){
           
