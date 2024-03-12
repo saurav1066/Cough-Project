@@ -61,7 +61,15 @@ server <- function(input, output, session) {
                           result$cough_data$USUBJID == input$SubjectID,]
     })
     new_df <- selected_data()
-    print(new_df)
+    
+    output$cough_count_plot <- renderPlot({
+      ggplot(new_df, aes(x = FASPID, y = FASTRESN, group = 1))+
+        geom_poit()+
+        geom_line()+
+        theme_minimal()
+      
+    })
+    
   })
 }
 
