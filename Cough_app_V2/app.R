@@ -81,7 +81,10 @@ server <- function(input, output, session) {
         summarise(
           count = n(),
           mean = mean(FASTRESN, na.rm = TRUE),
-          sd = sd(FASTRESN, na.rm = TRUE)
+          sd = sd(FASTRESN, na.rm = TRUE),
+          q1 = quantile(FASTRESN, 0.25, na.rm = TRUE),
+          median = median(FASTRESN, na.rm = TRUE),
+          q3 = quantile(FASTRESN, 0.75, na.rm = TRUE)
         ) %>%
         gt() %>%
         tab_header(
