@@ -1,6 +1,8 @@
 library(shiny)
 library(haven)
 library(ggplot2)
+library(gt)
+library(tidyverse)
 
 # Helper Functions --------------------------------------------------------
 
@@ -43,6 +45,8 @@ ui <- fluidPage(
                   label = "Select Visit Number",
                   choices = result$visit_id),
       
+      gt_output("summary_table"),
+      
     ),
     
     mainPanel(
@@ -68,6 +72,22 @@ server <- function(input, output, session) {
         geom_line()+
         theme_minimal()
       
+    })
+    
+    #generating summary table
+    
+    output$summary_table <- render_gt({
+      new_df %>%
+        summarise(
+          count = n(),
+          mean = mean(FASTRESN, na.rm = TRUE),
+          sd = sd(FASTRESN, na.rm = TRUE)
+        ) %>%
+        gt() %>%
+        tab_header(
+          title = "Summary Statistics"
+          
+        )
     })
     
   })
