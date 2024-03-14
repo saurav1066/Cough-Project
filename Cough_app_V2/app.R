@@ -75,7 +75,6 @@ server <- function(input, output, session) {
     })
     
     #generating summary table
-    
     output$summary_table <- render_gt({
       new_df %>%
         summarise(
@@ -86,12 +85,13 @@ server <- function(input, output, session) {
           median = median(FASTRESN, na.rm = TRUE),
           q3 = quantile(FASTRESN, 0.75, na.rm = TRUE)
         ) %>%
+        gather(key = "Statistic", value = "Value") %>%
         gt() %>%
         tab_header(
           title = "Summary Statistics"
-          
         )
     })
+    
     
   })
 }
